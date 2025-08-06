@@ -3,21 +3,22 @@ import { storage } from '../firebase/config';
 
 export async function uploadImageAsync(uri: string): Promise<string> {
   try {
-    console.log('📤 Converting URI to blob:', uri);
+    console.log('📤 Reading file from URI:', uri);
     const response = await fetch(uri);
-    const blob = await response.blob();
+    const arrayBuffer = await response.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
 
-    console.log('📤 Blob size:', blob.size);
-    console.log('📤 Blob type:', blob.type);
+    console.log('📤 Byte size:', bytes.byteLength);
 
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+    const extension = uri.split('.').pop()?.toLowerCase() === 'png' ? 'png' : 'jpg';
+    const contentType = extension === 'png' ? 'image/png' : 'image/jpeg';
+
+    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
     const storageRef = ref(storage, `photos/${filename}`);
 
     console.log('📤 Uploading to Firebase Storage path:', storageRef.fullPath);
 
-    await uploadBytes(storageRef, blob, {
-      contentType: blob.type || 'image/jpeg',
-    });
+    await uploadBytes(storageRef, bytes, { contentType });
 
     const downloadURL = await getDownloadURL(storageRef);
     console.log('✅ Uploaded to:', downloadURL);
