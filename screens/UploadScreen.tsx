@@ -9,14 +9,24 @@ export default function UploadScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const router = useRouter();
 
+  const [permission, requestPermission] = ImagePicker.useMediaLibraryPermissions();
+
   const pickImage = async () => {
+    if (!permission || !permission.granted) {
+      const { granted } = await requestPermission();
+      if (!granted) {
+        Alert.alert('Permission required', 'Allow access to your photos to continue.');
+        return;
+      }
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaType.Images,
       allowsEditing: false,
       quality: 1,
     });
 
-    if (!result.canceled) {
+    if (!result.canceled && result.assets.length > 0) {
       setImageUri(result.assets[0].uri);
     }
   };
