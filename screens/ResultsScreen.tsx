@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { useLocalSearchParams } from 'expo-router';
 
 import { callGeminiApi } from '../services/geminiApi';
 
-type ResultsRoute = {
-  Results: { imagePath: string };
-};
-
 export default function ResultsScreen() {
-  const route = useRoute<RouteProp<ResultsRoute, 'Results'>>();
-  const { imagePath } = route.params;
+  const { imagePath } = useLocalSearchParams<{ imagePath: string }>();
 
   const [feedback, setFeedback] = useState<string>('');
   const [loading, setLoading] = useState(true);

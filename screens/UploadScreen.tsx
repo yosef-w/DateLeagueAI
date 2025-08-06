@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { View, Image, Button, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 
 import { uploadImageAsync } from '../utils/uploadImage';
 
 export default function UploadScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const navigation = useNavigation<any>();
+  const router = useRouter();
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -25,7 +25,7 @@ export default function UploadScreen() {
     if (!imageUri) return;
     try {
       const gsPath = await uploadImageAsync(imageUri);
-      navigation.navigate('Results', { imagePath: gsPath });
+      router.push({ pathname: '/results', params: { imagePath: gsPath } });
     } catch (e) {
       console.error('Upload failed', e);
     }
