@@ -1,26 +1,30 @@
-import { ref, uploadBytes } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase/config';
 
-/**
- * Upload an image from a local URI to Firebase Storage.
- * @param uri local file URI of the image
- * @returns full gs:// path of the uploaded image
- */
 export async function uploadImageAsync(uri: string): Promise<string> {
-  // Fetch the file and convert it to a blob
-  const response = await fetch(uri);
-  const blob = await response.blob();
+  try {
+    console.log('📤 Converting URI to blob:', uri);
+    const response = await fetch(uri);
+    const blob = await response.blob();
 
-  // Generate a random file name
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
-  const storageRef = ref(storage, `photos/${filename}`);
+    console.log('📤 Blob size:', blob.size);
+    console.log('📤 Blob type:', blob.type);
 
-  // Upload to Firebase Storage with basic metadata
-  await uploadBytes(storageRef, blob, {
-    contentType: blob.type || 'image/jpeg',
-  });
+    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+    const storageRef = ref(storage, `photos/${filename}`);
 
-  // Return the full gs:// path
-  return `gs://${storageRef.bucket}/${storageRef.fullPath}`;
+    console.log('📤 Uploading to Firebase Storage path:', storageRef.fullPath);
+
+    await uploadBytes(storageRef, blob, {
+      contentType: blob.type || 'image/jpeg',
+    });
+
+    const downloadURL = await getDownloadURL(storageRef);
+    console.log('✅ Uploaded to:', downloadURL);
+    return downloadURL;
+  } catch (error: any) {
+    console.error('🔥 uploadImageAsync failed:', error.message);
+    console.error('🔥 Full error:', error);
+    throw error;
+  }
 }
-
