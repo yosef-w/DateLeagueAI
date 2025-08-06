@@ -15,8 +15,10 @@ export async function uploadImageAsync(uri: string): Promise<string> {
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
   const storageRef = ref(storage, `photos/${filename}`);
 
-  // Upload to Firebase Storage
-  await uploadBytes(storageRef, blob);
+  // Upload to Firebase Storage with basic metadata
+  await uploadBytes(storageRef, blob, {
+    contentType: blob.type || 'image/jpeg',
+  });
 
   // Return the full gs:// path
   return `gs://${storageRef.bucket}/${storageRef.fullPath}`;

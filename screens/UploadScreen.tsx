@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Image, Button, StyleSheet } from 'react-native';
+import { View, Image, Button, StyleSheet, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 
@@ -11,7 +11,7 @@ export default function UploadScreen() {
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaType.Images,
       allowsEditing: false,
       quality: 1,
     });
@@ -28,6 +28,7 @@ export default function UploadScreen() {
       router.push({ pathname: '/results', params: { imagePath: gsPath } });
     } catch (e) {
       console.error('Upload failed', e);
+      Alert.alert('Upload failed', 'Please try again later.');
     }
   };
 
