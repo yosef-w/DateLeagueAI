@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { callGeminiApi } from '../services/geminiApi';
-import Carousel from 'react-native-snap-carousel';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -19,7 +18,6 @@ export default function ResultsScreen() {
   const [imageArray, setImageArray] = useState<string[]>([]);
   const [feedbackArray, setFeedbackArray] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const carouselRef = useRef(null);
 
   useEffect(() => {
     const analyzeImages = async () => {
@@ -58,21 +56,27 @@ export default function ResultsScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Carousel
-        ref={carouselRef}
-        data={imageArray}
-        renderItem={({ item }) => (
-          <Image source={{ uri: item }} style={styles.image} />
-        )}
-        sliderWidth={screenWidth}
-        itemWidth={screenWidth * 0.8}
-        onSnapToItem={(index) => setActiveSlide(index)}
-        loop
-      />
+    <View style={styles.container}>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={(e) => {
+          const index = Math.round(
+            e.nativeEvent.contentOffset.x / screenWidth
+          );
+          setActiveSlide(index);
+        }}
+      >
+        {imageArray.map((uri, idx) => (
+          <View key={idx} style={styles.slide}>
+            <Image source={{ uri }} style={styles.image} />
+          </View>
+        ))}
+      </ScrollView>
 
       <Text style={styles.feedback}>{feedbackArray[activeSlide]}</Text>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -84,6 +88,10 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 16,
+    alignItems: 'center',
+  },
+  slide: {
+    width: screenWidth,
     alignItems: 'center',
   },
   image: {
