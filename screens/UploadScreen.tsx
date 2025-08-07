@@ -6,17 +6,17 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Text,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
-import { uploadToFirebaseAndGetUrl } from '../utils/uploadToFirebase';
+import uploadToFirebase from '../utils/uploadToFirebase';
 
-export default function UploadScreen() {
+const UploadScreen = (): React.ReactElement => {
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  const pickImage = async () => {
+  const pickImage = async (): Promise<void> => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
@@ -29,6 +29,7 @@ export default function UploadScreen() {
       });
       if (!result.canceled && result.assets.length > 0) {
         setImageUri(result.assets[0].uri);
+        setDownloadUrl(null);
       }
     } catch (e) {
       console.error('Error picking image:', e);
@@ -36,28 +37,16 @@ export default function UploadScreen() {
     }
   };
 
-  const handleAnalyze = async () => {
+  const handleUpload = async (): Promise<void> => {
     if (!imageUri) return;
     try {
       setLoading(true);
-      const downloadUrl = await uploadToFirebaseAndGetUrl(imageUri);
-      const res = await fetch(
-        'https://gemini-backend-633816661931.us-central1.run.app/analyze',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageUrl: downloadUrl }),
-        }
-      );
-      if (!res.ok) {
-        throw new Error('Request failed');
-      }
-      const data = await res.json();
-      const feedback: string = data.feedback || '';
-      router.push({ pathname: '/results', params: { feedback } });
+      const url = await uploadToFirebase(imageUri);
+      setDownloadUrl(url);
+      console.log('Uploaded image URL:', url);
     } catch (e) {
-      console.error('Upload or analysis failed:', e);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      console.error('Upload failed:', e);
+      Alert.alert('Error', 'Image upload failed.');
     } finally {
       setLoading(false);
     }
@@ -69,8 +58,13 @@ export default function UploadScreen() {
       {imageUri && (
         <>
           <Image source={{ uri: imageUri }} style={styles.image} />
-          <Button title="Upload & Analyze" onPress={handleAnalyze} />
+          <Button title="Upload" onPress={handleUpload} />
         </>
+      )}
+      {downloadUrl && (
+        <Text selectable style={styles.urlText}>
+          {downloadUrl}
+        </Text>
       )}
       {loading && (
         <View style={styles.loadingOverlay}>
@@ -79,7 +73,9 @@ export default function UploadScreen() {
       )}
     </View>
   );
-}
+};
+
+export default UploadScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -93,6 +89,10 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 8,
     marginVertical: 20,
+  },
+  urlText: {
+    marginTop: 16,
+    color: 'blue',
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,

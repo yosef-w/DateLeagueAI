@@ -1,12 +1,21 @@
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase/config';
-import { getBlob } from './getBlob';
+import getBlob from './getBlob';
 
-// Upload a local file to Firebase Storage and return its download URL
-export async function uploadToFirebaseAndGetUrl(uri: string): Promise<string> {
+const uuidv4 = (): string =>
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+
+const uploadToFirebase = async (uri: string): Promise<string> => {
   const blob = await getBlob(uri);
-  const filename = uri.split('/').pop() || `image-${Date.now()}`;
-  const storageRef = ref(storage, `uploads/${filename}`);
+  const fileName = `${uuidv4()}.jpg`;
+  const storageRef = ref(storage, `uploads/${fileName}`);
   await uploadBytes(storageRef, blob);
-  return getDownloadURL(storageRef);
-}
+  const url = await getDownloadURL(storageRef);
+  return url;
+};
+
+export default uploadToFirebase;
