@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { View, Image, Button, StyleSheet, Alert, Platform } from 'react-native';
+import {
+  View,
+  Image,
+  Button,
+  StyleSheet,
+  Alert,
+  Platform,
+  ScrollView,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 
 import { uploadImageAsync } from '../utils/uploadImage';
 
 export default function UploadScreen() {
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageUris, setImageUris] = useState<string[]>([]);
   const [permission, requestPermission] = ImagePicker.useMediaLibraryPermissions();
   const router = useRouter();
 
@@ -21,7 +29,7 @@ export default function UploadScreen() {
     })();
   }, []);
 
-  const pickImage = async () => {
+  const pickImages = async () => {
     try {
       if (Platform.OS === 'web') {
         Alert.alert('Unsupported', 'Image Picker is not supported on web.');
@@ -37,7 +45,8 @@ export default function UploadScreen() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ Use PascalCase
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
         allowsEditing: false,
         quality: 1,
       });
@@ -45,7 +54,7 @@ export default function UploadScreen() {
       console.log('📸 Image picker result:', result);
 
       if (!result.canceled && result.assets?.length > 0) {
-        setImageUri(result.assets[0].uri);
+        setImageUris(result.assets.map((asset) => asset.uri));
       }
     } catch (error) {
       console.error('❌ Error picking image:', error);
@@ -54,12 +63,20 @@ export default function UploadScreen() {
   };
 
   const handleUpload = async () => {
-    if (!imageUri) return;
+    if (imageUris.length === 0) return;
 
     try {
-      const imageUrl = await uploadImageAsync(imageUri);
-      console.log('✅ Image uploaded to:', imageUrl);
-      router.push({ pathname: '/results', params: { imagePath: imageUrl } });
+      const uploadedUrls: string[] = [];
+      for (const uri of imageUris) {
+        const imageUrl = await uploadImageAsync(uri);
+        uploadedUrls.push(imageUrl);
+      }
+
+      console.log('✅ Uploaded URLs:', uploadedUrls);
+      router.push({
+        pathname: '/results',
+        params: { imagePaths: JSON.stringify(uploadedUrls) },
+      });
     } catch (e) {
       console.error('❌ Upload failed:', e);
       Alert.alert('Upload failed', 'Please try again later.');
@@ -68,10 +85,14 @@ export default function UploadScreen() {
 
   return (
     <View style={styles.container}>
-      <Button title="Choose Photo" onPress={pickImage} />
-      {imageUri && (
+      <Button title="Choose Photos" onPress={pickImages} />
+      {imageUris.length > 0 && (
         <>
-          <Image source={{ uri: imageUri }} style={styles.image} />
+          <ScrollView horizontal style={styles.carousel}>
+            {imageUris.map((uri, idx) => (
+              <Image key={idx} source={{ uri }} style={styles.image} />
+            ))}
+          </ScrollView>
           <Button title="Upload & Analyze" onPress={handleUpload} />
         </>
       )}
@@ -86,10 +107,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 16,
   },
-  image: {
-    width: 200,
-    height: 200,
+  carousel: {
     marginVertical: 20,
+  },
+  image: {
+    width: 180,
+    height: 180,
+    marginRight: 10,
     borderRadius: 8,
   },
 });
