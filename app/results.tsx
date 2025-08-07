@@ -1,1 +1,3 @@
-export { default } from '../screens/ResultsScreen';
+import ResultsScreen from '../screens/ResultsScreen';
+
+export default ResultsScreen;
