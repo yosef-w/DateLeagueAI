@@ -26,7 +26,12 @@ export default function Step1() {
       <FadeSlide keySuffix="body1" delay={220}>
         <View style={styles.bullets}>
           {bullets.map((line, idx) => (
-            <FadeSlide keySuffix={`b1-${idx}`} delay={260 + idx * 80} fromY={10}>
+            <FadeSlide
+              key={line}
+              keySuffix={`b1-${idx}`}
+              delay={260 + idx * 80}
+              fromY={10}
+            >
               <Text style={styles.bullet}>{line}</Text>
             </FadeSlide>
           ))}
