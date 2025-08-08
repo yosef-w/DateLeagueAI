@@ -122,7 +122,7 @@ export default function OnboardingFlow() {
 
   const goToUpload = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.replace(UPLOAD_ROUTE);
+    router.push(UPLOAD_ROUTE);
   }, [router]);
 
   const goPrev = useCallback(async () => {
@@ -134,7 +134,7 @@ export default function OnboardingFlow() {
   const goNext = useCallback(async () => {
     if (isLast) {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      router.replace(UPLOAD_ROUTE);
+      router.push(UPLOAD_ROUTE);
       return;
     }
     await Haptics.selectionAsync();
@@ -199,9 +199,6 @@ export default function OnboardingFlow() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
-  // A key that forces AnimatePresence to re-run on page change
-  const animKey = screens[index]?.key ?? `k-${index}`;
-
   return (
     <LinearGradient colors={['#0f172a', '#111827']} style={styles.screen}>
       <SafeAreaView style={{ flex: 1 }}>
@@ -235,68 +232,76 @@ export default function OnboardingFlow() {
         showsHorizontalScrollIndicator={false}
         onScrollBeginDrag={onScrollBegin}
         onMomentumScrollEnd={onScrollEnd}
-        renderItem={({ item }) => (
-          <View style={styles.page}>
-            <View style={styles.card}>
-              <AnimatePresence exitBeforeEnter>
-                {/* Lottie */}
-                {item.lottie && (
-                  <MotiView
-                    key={`lot-${animKey}`}
-                    from={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ type: 'timing', duration: 420 }}
-                  >
-                    <LottieView source={item.lottie} autoPlay loop style={styles.lottie} />
-                  </MotiView>
-                )}
+        renderItem={({ item }) => {
+          const animKey = item.key;
+          return (
+            <View style={styles.page}>
+              <View style={styles.card}>
+                <AnimatePresence>
+                  {/* Lottie */}
+                  {item.lottie && (
+                    <MotiView
+                      key={`lot-${animKey}`}
+                      from={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ type: 'timing', duration: 420 }}
+                    >
+                      <LottieView source={item.lottie} autoPlay loop style={styles.lottie} />
+                    </MotiView>
+                  )}
 
-                {/* Title */}
-                <FadeSlide keySuffix={`title-${animKey}`} delay={60}>
-                  <Text style={styles.title}>{item.title}</Text>
-                </FadeSlide>
-
-                {/* Subtitle */}
-                <FadeSlide keySuffix={`sub-${animKey}`} delay={140}>
-                  <Text style={styles.subtitle}>{item.subtitle}</Text>
-                </FadeSlide>
-
-                {/* Bullets */}
-                {'body' in item && item.body && (
-                  <FadeSlide keySuffix={`body-${animKey}`} delay={220}>
-                    <View style={styles.bullets}>
-                      {item.body.map((line, idx) => (
-                        <FadeSlide key={`b-${animKey}-${idx}`} keySuffix={`b-${animKey}-${idx}`} delay={260 + idx * 80} fromY={10}>
-                          <Text style={styles.bullet}>{line}</Text>
-                        </FadeSlide>
-                      ))}
-                    </View>
+                  {/* Title */}
+                  <FadeSlide key={`title-${animKey}`} keySuffix={`title-${animKey}`} delay={60}>
+                    <Text style={styles.title}>{item.title}</Text>
                   </FadeSlide>
-                )}
 
-                {/* Chart */}
-                {'chart' in item && item.chart && (
-                  <FadeSlide keySuffix={`chart-${animKey}`} delay={260}>
-                    <BarChart
-                      width={Math.min(SCREEN_W - 48, 360)}
-                      height={180}
-                      items={item.chart.data}
-                      yLabel={item.chart.yLabel}
-                    />
+                  {/* Subtitle */}
+                  <FadeSlide key={`sub-${animKey}`} keySuffix={`sub-${animKey}`} delay={140}>
+                    <Text style={styles.subtitle}>{item.subtitle}</Text>
                   </FadeSlide>
-                )}
 
-                {/* Fineprint */}
-                {'fineprint' in item && item.fineprint && (
-                  <FadeSlide keySuffix={`fine-${animKey}`} delay={300}>
-                    <Text style={styles.fineprint}>{item.fineprint}</Text>
-                  </FadeSlide>
-                )}
-              </AnimatePresence>
+                  {/* Bullets */}
+                  {'body' in item && item.body && (
+                    <FadeSlide key={`body-${animKey}`} keySuffix={`body-${animKey}`} delay={220}>
+                      <View style={styles.bullets}>
+                        {item.body.map((line, idx) => (
+                          <FadeSlide
+                            key={`b-${animKey}-${idx}`}
+                            keySuffix={`b-${animKey}-${idx}`}
+                            delay={260 + idx * 80}
+                            fromY={10}
+                          >
+                            <Text style={styles.bullet}>{line}</Text>
+                          </FadeSlide>
+                        ))}
+                      </View>
+                    </FadeSlide>
+                  )}
+
+                  {/* Chart */}
+                  {'chart' in item && item.chart && (
+                    <FadeSlide key={`chart-${animKey}`} keySuffix={`chart-${animKey}`} delay={260}>
+                      <BarChart
+                        width={Math.min(SCREEN_W - 48, 360)}
+                        height={180}
+                        items={item.chart.data}
+                        yLabel={item.chart.yLabel}
+                      />
+                    </FadeSlide>
+                  )}
+
+                  {/* Fineprint */}
+                  {'fineprint' in item && item.fineprint && (
+                    <FadeSlide key={`fine-${animKey}`} keySuffix={`fine-${animKey}`} delay={300}>
+                      <Text style={styles.fineprint}>{item.fineprint}</Text>
+                    </FadeSlide>
+                  )}
+                </AnimatePresence>
+              </View>
             </View>
-          </View>
-        )}
+          );
+        }}
         />
 
         {/* Dots */}
