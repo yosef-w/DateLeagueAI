@@ -23,6 +23,7 @@ export default function RootLayout() {
       <SafeAreaView style={{ flex: 1 }}>
         <Stack initialRouteName="index">
           <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
           <Stack.Screen name="upload" options={{ headerShown: false }} />
           <Stack.Screen name="results" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
