@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import LottieView from 'lottie-react-native';
-import FadeSlide from './FadeSlide';
+import FadeIn from './FadeIn';
 import { styles } from './styles';
 
 export default function Step1() {
@@ -12,31 +12,30 @@ export default function Step1() {
   ];
   return (
     <>
-      <FadeSlide keySuffix="lot1">
+      <FadeIn keySuffix="lot1">
         <LottieView source={require('../../assets/lottie/camera-spark.json')} autoPlay loop style={styles.lottie} />
-      </FadeSlide>
-      <FadeSlide keySuffix="title1" delay={60}>
+      </FadeIn>
+      <FadeIn keySuffix="title1" delay={60}>
         <Text style={styles.title}>Meet DateLeague AI</Text>
-      </FadeSlide>
-      <FadeSlide keySuffix="sub1" delay={140}>
+      </FadeIn>
+      <FadeIn keySuffix="sub1" delay={140}>
         <Text style={styles.subtitle}>
           Your personal coach for Hinge, Bumble, Tinder—upload your profile screenshots and get targeted, step-by-step fixes.
         </Text>
-      </FadeSlide>
-      <FadeSlide keySuffix="body1" delay={220}>
+      </FadeIn>
+      <FadeIn keySuffix="body1" delay={220}>
         <View style={styles.bullets}>
           {bullets.map((line, idx) => (
-            <FadeSlide
+            <FadeIn
               key={line}
               keySuffix={`b1-${idx}`}
               delay={260 + idx * 80}
-              fromY={10}
             >
               <Text style={styles.bullet}>{line}</Text>
-            </FadeSlide>
+            </FadeIn>
           ))}
         </View>
-      </FadeSlide>
+      </FadeIn>
     </>
   );
 }

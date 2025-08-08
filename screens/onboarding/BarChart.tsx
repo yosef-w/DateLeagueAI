@@ -33,30 +33,25 @@ export default function BarChart({
           const x = padding + i * (barWidth + barGap);
           const y = height - h - 20;
           const isActive = i === active;
-
           return (
-            <Pressable
+            <Rect
               key={d.label + i}
+              x={x}
+              y={y}
+              width={barWidth}
+              height={h}
+              rx={6}
+              ry={6}
+              fill={isActive ? '#60a5fa' : 'rgba(255,255,255,0.25)'}
               onPress={async () => {
                 setActive(i);
                 await Haptics.selectionAsync();
               }}
-              style={{ position: 'absolute', left: x, top: y, width: barWidth, height: h }}
-            >
-              <Rect
-                x={0}
-                y={0}
-                width={barWidth}
-                height={h}
-                rx={6}
-                ry={6}
-                fill={isActive ? '#60a5fa' : 'rgba(255,255,255,0.25)'}
-              />
-            </Pressable>
+            />
           );
         })}
       </Svg>
-      <View style={[styles.chartLabelsRow, { width }]}> 
+      <View style={[styles.chartLabelsRow, { width }]}>
         {items.map((d, i) => (
           <Pressable
             key={d.label + i}
