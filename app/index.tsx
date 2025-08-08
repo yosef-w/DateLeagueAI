@@ -1,1 +1,1 @@
-export { default } from '../screens/UploadScreen';
+export { default } from './onboarding';
