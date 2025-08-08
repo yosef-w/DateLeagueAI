@@ -16,6 +16,8 @@ import Svg, { Rect } from 'react-native-svg';
 import LottieView from 'lottie-react-native';
 import { MotiView, AnimatePresence } from 'moti';
 import * as Haptics from 'expo-haptics';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
@@ -116,11 +118,18 @@ export default function OnboardingFlow() {
   );
 
   const isLast = index === screens.length - 1;
+  const isFirst = index === 0;
 
   const goToUpload = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.replace(UPLOAD_ROUTE);
   }, [router]);
+
+  const goPrev = useCallback(async () => {
+    if (isFirst) return;
+    await Haptics.selectionAsync();
+    pagerRef.current?.scrollToIndex({ index: index - 1, animated: true });
+  }, [index, isFirst]);
 
   const goNext = useCallback(async () => {
     if (isLast) {
@@ -195,17 +204,29 @@ export default function OnboardingFlow() {
 
   return (
     <LinearGradient colors={['#0f172a', '#111827']} style={styles.screen}>
-      {/* Skip */}
-      <Pressable
-        onPress={goToUpload}
-        onPressIn={() => Haptics.selectionAsync()}
-        style={({ pressed }) => [styles.skipBtn, pressed && styles.skipPressed]}
-        hitSlop={8}
-      >
-        <Text style={styles.skipText}>Skip</Text>
-      </Pressable>
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Back */}
+        {!isFirst && (
+          <Pressable
+            onPress={goPrev}
+            onPressIn={() => Haptics.selectionAsync()}
+            style={({ pressed }) => [styles.backBtn, pressed && styles.backPressed]}
+            hitSlop={8}
+          >
+            <Ionicons name="chevron-back" size={24} color="#e5e7eb" />
+          </Pressable>
+        )}
+        {/* Skip */}
+        <Pressable
+          onPress={goToUpload}
+          onPressIn={() => Haptics.selectionAsync()}
+          style={({ pressed }) => [styles.skipBtn, pressed && styles.skipPressed]}
+          hitSlop={8}
+        >
+          <Text style={styles.skipText}>Skip</Text>
+        </Pressable>
 
-      <FlatList
+        <FlatList
         ref={pagerRef}
         data={screens}
         keyExtractor={(it) => it.key}
@@ -276,42 +297,43 @@ export default function OnboardingFlow() {
             </View>
           </View>
         )}
-      />
+        />
 
-      {/* Dots */}
-      <View style={styles.dotsRow}>
-        {screens.map((_, i) => (
-          <View key={i} style={[styles.dot, i === index && styles.dotActive]} />
-        ))}
-      </View>
-
-      {/* Progress bar (auto-advance) */}
-      {!isLast && (
-        <View style={styles.progressWrap}>
-          <Animated.View
-            style={[
-              styles.progressFill,
-              {
-                width: progress.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['0%', '100%'],
-                }),
-              },
-            ]}
-          />
+        {/* Dots */}
+        <View style={styles.dotsRow}>
+          {screens.map((_, i) => (
+            <View key={i} style={[styles.dot, i === index && styles.dotActive]} />
+          ))}
         </View>
-      )}
 
-      {/* Continue button */}
-      <Pressable
-        style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
-        onPress={goNext}
-        onPressIn={() => Haptics.selectionAsync()}
-      >
-        <Text style={styles.ctaText}>
-          {isLast ? screens[index].ctaLabel || 'Continue' : 'Continue'}
-        </Text>
-      </Pressable>
+        {/* Progress bar (auto-advance) */}
+        {!isLast && (
+          <View style={styles.progressWrap}>
+            <Animated.View
+              style={[
+                styles.progressFill,
+                {
+                  width: progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0%', '100%'],
+                  }),
+                },
+              ]}
+            />
+          </View>
+        )}
+
+        {/* Continue button */}
+        <Pressable
+          style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
+          onPress={goNext}
+          onPressIn={() => Haptics.selectionAsync()}
+        >
+          <Text style={styles.ctaText}>
+            {isLast ? screens[index].ctaLabel || 'Continue' : 'Continue'}
+          </Text>
+        </Pressable>
+      </SafeAreaView>
     </LinearGradient>
   );
 }
@@ -416,6 +438,18 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(255,255,255,0.15)',
   },
+  backBtn: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    zIndex: 10,
+    padding: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.18)',
+  },
+  backPressed: { transform: [{ scale: 0.98 }] },
   skipBtn: {
     position: 'absolute',
     top: 16,

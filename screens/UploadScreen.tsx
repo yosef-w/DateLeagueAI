@@ -16,6 +16,9 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import { useRouter } from 'expo-router';
 import uploadToFirebase from '../utils/uploadToFirebase';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Haptics from 'expo-haptics';
 
 const ANALYZE_URL =
   'https://gemini-backend-633816661931.us-central1.run.app/analyze';
@@ -355,8 +358,19 @@ export default function UploadScreen(): React.ReactElement {
 
   return (
     <LinearGradient colors={['#0f172a', '#111827']} style={styles.screen}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Upload Photos</Text>
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Back */}
+        <Pressable
+          onPress={() => router.back()}
+          onPressIn={() => Haptics.selectionAsync()}
+          style={({ pressed }) => [styles.backBtn, pressed && styles.backPressed]}
+          hitSlop={8}
+        >
+          <Ionicons name="chevron-back" size={24} color="#e5e7eb" />
+        </Pressable>
+
+        <View style={styles.container}>
+          <Text style={styles.title}>Upload Photos</Text>
         <Text style={styles.subtitle}>
           Add up to {MAX_IMAGES} photos. Analyze all or pick your best.
         </Text>
@@ -450,10 +464,11 @@ export default function UploadScreen(): React.ReactElement {
           )}
         </View>
 
-        <View style={styles.footerRow}>
-          <PrimaryButton label="Clear All" onPress={clearAll} variant="ghost" />
+          <View style={styles.footerRow}>
+            <PrimaryButton label="Clear All" onPress={clearAll} variant="ghost" />
+          </View>
         </View>
-      </View>
+      </SafeAreaView>
     </LinearGradient>
   );
 }
@@ -504,6 +519,18 @@ function PrimaryButton({
 // ---- styles ----
 const styles = StyleSheet.create({
   screen: { flex: 1 },
+  backBtn: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    zIndex: 10,
+    padding: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.18)',
+  },
+  backPressed: { transform: [{ scale: 0.98 }] },
   container: {
     flex: 1,
     padding: 20,
