@@ -47,11 +47,15 @@ export const styles = StyleSheet.create({
   skipPressed: { transform: [{ scale: 0.98 }] },
   skipText: { color: '#e5e7eb', fontWeight: '600' },
   lottie: {
-    width: 160,
+    width: 360,
     height: 160,
     alignSelf: 'center',
     marginBottom: 8,
   },
+  lottieWrapper: {
+  marginTop: -70, // pull it closer to the top
+  alignItems: 'center',
+},
   title: { color: 'white', fontSize: 28, fontWeight: '700', letterSpacing: 0.2 },
   subtitle: {
     color: '#cbd5e1',

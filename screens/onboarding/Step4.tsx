@@ -9,7 +9,7 @@ export default function Step4() {
   return (
     <>
       <FadeIn keySuffix="lot4">
-        <LottieView source={require('../../assets/lottie/confetti-stars.json')} autoPlay loop style={styles.lottie} />
+        <LottieView source={require('../../assets/lottie/hearts.json')} autoPlay loop style={styles.lottie} />
       </FadeIn>
       <FadeIn keySuffix="title4" delay={60}>
         <Text style={styles.title}>We turn swipes into dates</Text>
