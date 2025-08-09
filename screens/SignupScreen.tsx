@@ -12,6 +12,10 @@ const QUESTIONS = [
     options: ['Male', 'Female'],
   },
   {
+    question: 'What is your age range?',
+    options: ['18-24', '25-34', '35-44', '45-54', '55+'],
+  },
+  {
     question: 'What dating app do you use?',
     options: [
       'Tinder',
@@ -79,7 +83,7 @@ export default function SignupScreen() {
       });
       if (index === QUESTIONS.length - 1) {
         await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        router.push('/upload');
+        router.push('/likes');
         return;
       }
       await Haptics.selectionAsync();
