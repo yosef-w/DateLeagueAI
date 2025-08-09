@@ -106,19 +106,26 @@ export default function SignupScreen() {
   return (
     <LinearGradient colors={['#0f172a', '#111827']} style={styles.screen}>
       <SafeAreaView style={{ flex: 1 }}>
-        <View style={[styles.progressWrap, { marginTop: insets.top }]}>
-          <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
-        </View>
+        <Pressable
+          onPress={goBack}
+          onPressIn={() => Haptics.selectionAsync()}
+          style={({ pressed }) => [
+            styles.backBtn,
+            { top: insets.top + 8 },
+            pressed && styles.backPressed,
+          ]}
+          hitSlop={8}
+        >
+          <Ionicons name="chevron-back" size={24} color="#e5e7eb" />
+        </Pressable>
 
-        <View style={styles.header}>
-          <Pressable
-            onPress={goBack}
-            onPressIn={() => Haptics.selectionAsync()}
-            style={({ pressed }) => [styles.backBtn, pressed && styles.backPressed]}
-            hitSlop={8}
-          >
-            <Ionicons name="chevron-back" size={24} color="#e5e7eb" />
-          </Pressable>
+        <View
+          style={[
+            styles.progressWrap,
+            { marginTop: insets.top + 56, marginBottom: 24 },
+          ]}
+        >
+          <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
         </View>
 
         <View style={styles.page}>
@@ -163,13 +170,6 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#60a5fa',
   },
-  header: {
-    width: '100%',
-    paddingHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 24,
-    alignItems: 'flex-start',
-  },
   page: {
     flex: 1,
     alignItems: 'center',
@@ -212,6 +212,10 @@ const styles = StyleSheet.create({
   optionPressed: { transform: [{ scale: 0.98 }] },
   optionText: { color: '#e5e7eb', fontSize: 16, fontWeight: '600' },
   backBtn: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    zIndex: 10,
     padding: 8,
     borderRadius: 999,
     backgroundColor: 'rgba(255,255,255,0.08)',
