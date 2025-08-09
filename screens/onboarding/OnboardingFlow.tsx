@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
-import { AnimatePresence } from 'moti';
 
 import Step1 from './Step1';
 import Step2 from './Step2';
@@ -13,7 +12,7 @@ import Step3 from './Step3';
 import Step4 from './Step4';
 import { styles } from './styles';
 
-const steps = [<Step1 />, <Step2 />, <Step3 />, <Step4 />];
+const steps = [Step1, Step2, Step3, Step4];
 
 export default function OnboardingFlow() {
   const router = useRouter();
@@ -42,6 +41,8 @@ export default function OnboardingFlow() {
     router.push('/upload');
   }, [router]);
 
+  const Step = steps[index];
+
   return (
     <LinearGradient colors={['#0f172a', '#111827']} style={styles.screen}>
       <SafeAreaView style={{ flex: 1 }}>
@@ -66,11 +67,7 @@ export default function OnboardingFlow() {
 
         <View style={styles.page}>
           <View style={styles.card}>
-            <AnimatePresence>
-              {steps.map((Comp, i) =>
-                i === index ? <React.Fragment key={i}>{Comp}</React.Fragment> : null
-              )}
-            </AnimatePresence>
+            <Step />
           </View>
         </View>
 

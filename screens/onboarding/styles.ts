@@ -1,15 +1,15 @@
 import { StyleSheet, Dimensions } from 'react-native';
 
-export const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+export const { width: SCREEN_W } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
   screen: { flex: 1 },
   page: {
-    width: SCREEN_W,
-    height: SCREEN_H,
+    flex: 1,
+    width: '100%',
     paddingHorizontal: 16,
-    paddingTop: 80,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   card: {
     width: '100%',
@@ -63,7 +63,7 @@ export const styles = StyleSheet.create({
   bullet: { color: '#e5e7eb', fontSize: 16, lineHeight: 22 },
   dotsRow: {
     position: 'absolute',
-    bottom: 112,
+    bottom: 96,
     left: 0,
     right: 0,
     flexDirection: 'row',
@@ -79,7 +79,7 @@ export const styles = StyleSheet.create({
   dotActive: { backgroundColor: '#60a5fa' },
   cta: {
     position: 'absolute',
-    bottom: 32,
+    bottom: 24,
     left: 16,
     right: 16,
     paddingVertical: 14,
