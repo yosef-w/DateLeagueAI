@@ -15,7 +15,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { LinearGradient } from 'expo-linear-gradient';
 import Markdown from 'react-native-markdown-display';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 
@@ -24,6 +24,7 @@ type Section = { title: string; body: string };
 export default function ResultsScreen() {
   const { feedback } = useLocalSearchParams<{ feedback?: string }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const sections = useMemo(() => parseFeedback(feedback ?? ''), [feedback]);
   const [active, setActive] = useState(0);
@@ -79,7 +80,11 @@ export default function ResultsScreen() {
         <Pressable
           onPress={() => router.back()}
           onPressIn={() => Haptics.selectionAsync()}
-          style={({ pressed }) => [styles.backBtn, pressed && styles.backPressed]}
+          style={({ pressed }) => [
+            styles.backBtn,
+            { top: insets.top + 8 },
+            pressed && styles.backPressed,
+          ]}
           hitSlop={8}
         >
           <Ionicons name="chevron-back" size={24} color="#e5e7eb" />

@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 
@@ -16,6 +16,7 @@ const steps = [Step1, Step2, Step3, Step4];
 
 export default function OnboardingFlow() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [index, setIndex] = useState(0);
   const isFirst = index === 0;
   const isLast = index === steps.length - 1;
@@ -50,7 +51,11 @@ export default function OnboardingFlow() {
           <Pressable
             onPress={goPrev}
             onPressIn={() => Haptics.selectionAsync()}
-            style={({ pressed }) => [styles.backBtn, pressed && styles.backPressed]}
+            style={({ pressed }) => [
+              styles.backBtn,
+              { top: insets.top + 8 },
+              pressed && styles.backPressed,
+            ]}
             hitSlop={8}
           >
             <Ionicons name="chevron-back" size={24} color="#e5e7eb" />
@@ -59,7 +64,11 @@ export default function OnboardingFlow() {
         <Pressable
           onPress={goToUpload}
           onPressIn={() => Haptics.selectionAsync()}
-          style={({ pressed }) => [styles.skipBtn, pressed && styles.skipPressed]}
+          style={({ pressed }) => [
+            styles.skipBtn,
+            { top: insets.top + 8 },
+            pressed && styles.skipPressed,
+          ]}
           hitSlop={8}
         >
           <Text style={styles.skipText}>Skip</Text>

@@ -16,7 +16,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import { useRouter } from 'expo-router';
 import uploadToFirebase from '../utils/uploadToFirebase';
 import { LinearGradient } from 'expo-linear-gradient';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 
@@ -47,6 +47,7 @@ export default function UploadScreen(): React.ReactElement {
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const busyRef = useRef(false);
 
   const canAnalyze = useMemo(() => items.length > 0 && step === 'idle', [items, step]);
@@ -363,7 +364,11 @@ export default function UploadScreen(): React.ReactElement {
         <Pressable
           onPress={() => router.back()}
           onPressIn={() => Haptics.selectionAsync()}
-          style={({ pressed }) => [styles.backBtn, pressed && styles.backPressed]}
+          style={({ pressed }) => [
+            styles.backBtn,
+            { top: insets.top + 8 },
+            pressed && styles.backPressed,
+          ]}
           hitSlop={8}
         >
           <Ionicons name="chevron-back" size={24} color="#e5e7eb" />
