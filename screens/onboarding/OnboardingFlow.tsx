@@ -24,7 +24,7 @@ export default function OnboardingFlow() {
   const goNext = useCallback(async () => {
     if (isLast) {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      router.push('/upload');
+      router.push('/signup');
       return;
     }
     await Haptics.selectionAsync();
@@ -37,9 +37,9 @@ export default function OnboardingFlow() {
     setIndex((i) => i - 1);
   }, [isFirst]);
 
-  const goToUpload = useCallback(async () => {
+  const goToSignup = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push('/upload');
+    router.push('/signup');
   }, [router]);
 
   const Step = steps[index];
@@ -62,7 +62,7 @@ export default function OnboardingFlow() {
           </Pressable>
         )}
         <Pressable
-          onPress={goToUpload}
+          onPress={goToSignup}
           onPressIn={() => Haptics.selectionAsync()}
           style={({ pressed }) => [
             styles.skipBtn,
