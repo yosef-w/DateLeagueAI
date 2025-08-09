@@ -15,12 +15,16 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { LinearGradient } from 'expo-linear-gradient';
 import Markdown from 'react-native-markdown-display';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Haptics from 'expo-haptics';
 
 type Section = { title: string; body: string };
 
 export default function ResultsScreen() {
   const { feedback } = useLocalSearchParams<{ feedback?: string }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const sections = useMemo(() => parseFeedback(feedback ?? ''), [feedback]);
   const [active, setActive] = useState(0);
@@ -71,8 +75,23 @@ export default function ResultsScreen() {
 
   return (
     <LinearGradient colors={['#0f172a', '#111827']} style={styles.screen}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Analysis Results</Text>
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Back */}
+        <Pressable
+          onPress={() => router.back()}
+          onPressIn={() => Haptics.selectionAsync()}
+          style={({ pressed }) => [
+            styles.backBtn,
+            { top: insets.top + 8 },
+            pressed && styles.backPressed,
+          ]}
+          hitSlop={8}
+        >
+          <Ionicons name="chevron-back" size={24} color="#e5e7eb" />
+        </Pressable>
+
+        <View style={styles.container}>
+          <Text style={styles.title}>Analysis Results</Text>
         <Text style={styles.subtitle}>
           Tips tailored to your photo{sections.length > 1 ? 's' : ''}. You can copy, share, or save for later.
         </Text>
@@ -116,11 +135,11 @@ export default function ResultsScreen() {
           </View>
         </View>
 
-        <View style={styles.footerRow}>
-          <PrimaryButton label="Analyze more photos" onPress={() => router.replace('/')} />
-          <PrimaryButton label="Back" onPress={() => router.back()} variant="ghost" />
+          <View style={styles.footerRow}>
+            <PrimaryButton label="Analyze more photos" onPress={() => router.replace('/')} />
+          </View>
         </View>
-      </View>
+      </SafeAreaView>
     </LinearGradient>
   );
 }
@@ -202,6 +221,18 @@ function PrimaryButton({
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
+  backBtn: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    zIndex: 10,
+    padding: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.18)',
+  },
+  backPressed: { transform: [{ scale: 0.98 }] },
   container: {
     flex: 1,
     padding: 20,
