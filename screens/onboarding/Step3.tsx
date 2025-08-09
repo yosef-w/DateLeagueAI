@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import LottieView from 'lottie-react-native';
 import FadeIn from './FadeIn';
@@ -11,11 +11,18 @@ export default function Step3() {
     'One clean line > paragraphs. Clarity wins the “yes.”',
   ];
 
+  const lotRef = useRef<LottieView>(null);
+
+  useEffect(() => {
+    lotRef.current?.play?.();
+  }, []);
+
   return (
     <>
       {/* Hero */}
       <FadeIn keySuffix="lot3">
         <LottieView
+          ref={lotRef}
           source={require('../../assets/lottie/clock-tick.json')}
           autoPlay
           loop
