@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { View, Text, Pressable, StyleSheet, Animated, Dimensions } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Animated, Dimensions, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -53,8 +53,12 @@ export default function SignupScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [index, setIndex] = useState(0);
+  const [answers, setAnswers] = useState<(string | null)[]>(
+    Array(QUESTIONS.length).fill(null)
+  );
   const slide = useRef(new Animated.Value(0)).current;
   const direction = useRef(1);
+  const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     slide.setValue(direction.current * SCREEN_W);
@@ -63,10 +67,16 @@ export default function SignupScreen() {
       duration: 250,
       useNativeDriver: true,
     }).start();
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, [index, slide]);
 
   const onSelect = useCallback(
     async (option: string) => {
+      setAnswers(a => {
+        const copy = [...a];
+        copy[index] = option;
+        return copy;
+      });
       if (index === QUESTIONS.length - 1) {
         await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         router.push('/upload');
@@ -90,33 +100,36 @@ export default function SignupScreen() {
     setIndex(i => i - 1);
   }, [index, router]);
 
-  const progress = index / QUESTIONS.length;
+  const progress = (index + 1) / QUESTIONS.length;
   const { question, options } = QUESTIONS[index];
 
   return (
     <LinearGradient colors={['#0f172a', '#111827']} style={styles.screen}>
       <SafeAreaView style={{ flex: 1 }}>
-        <Pressable
-          onPress={goBack}
-          onPressIn={() => Haptics.selectionAsync()}
-          style={({ pressed }) => [
-            styles.backBtn,
-            { top: insets.top + 8 },
-            pressed && styles.backPressed,
-          ]}
-          hitSlop={8}
-        >
-          <Ionicons name="chevron-back" size={24} color="#e5e7eb" />
-        </Pressable>
-
-        <View style={styles.progressWrap}>
+        <View style={[styles.progressWrap, { marginTop: insets.top }]}>
           <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
+        </View>
+
+        <View style={styles.header}>
+          <Pressable
+            onPress={goBack}
+            onPressIn={() => Haptics.selectionAsync()}
+            style={({ pressed }) => [styles.backBtn, pressed && styles.backPressed]}
+            hitSlop={8}
+          >
+            <Ionicons name="chevron-back" size={24} color="#e5e7eb" />
+          </Pressable>
         </View>
 
         <View style={styles.page}>
           <Animated.View style={[styles.card, { transform: [{ translateX: slide }] }]}>
             <Text style={styles.question}>{question}</Text>
-            <View style={styles.options}>
+            <ScrollView
+              ref={scrollRef}
+              style={styles.options}
+              contentContainerStyle={styles.optionsContent}
+              showsVerticalScrollIndicator={false}
+            >
               {options.map(opt => (
                 <Pressable
                   key={opt}
@@ -124,13 +137,14 @@ export default function SignupScreen() {
                   onPressIn={() => Haptics.selectionAsync()}
                   style={({ pressed }) => [
                     styles.optionBtn,
+                    answers[index] === opt && styles.optionSelected,
                     pressed && styles.optionPressed,
                   ]}
                 >
                   <Text style={styles.optionText}>{opt}</Text>
                 </Pressable>
               ))}
-            </View>
+            </ScrollView>
           </Animated.View>
         </View>
       </SafeAreaView>
@@ -149,16 +163,24 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#60a5fa',
   },
+  header: {
+    width: '100%',
+    paddingHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 24,
+    alignItems: 'flex-start',
+  },
   page: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
     paddingHorizontal: 16,
   },
   card: {
     width: '100%',
     maxWidth: 520,
     alignItems: 'center',
+    marginTop: 'auto',
+    marginBottom: 'auto',
   },
   question: {
     color: 'white',
@@ -167,10 +189,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 24,
   },
-  options: {
-    width: '100%',
+  options: { width: '100%' },
+  optionsContent: {
     alignItems: 'center',
     gap: 12,
+    paddingBottom: 24,
   },
   optionBtn: {
     width: '100%',
@@ -182,12 +205,13 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(255,255,255,0.18)',
   },
+  optionSelected: {
+    borderColor: '#60a5fa',
+    backgroundColor: 'rgba(96,165,250,0.15)',
+  },
   optionPressed: { transform: [{ scale: 0.98 }] },
   optionText: { color: '#e5e7eb', fontSize: 16, fontWeight: '600' },
   backBtn: {
-    position: 'absolute',
-    left: 16,
-    zIndex: 10,
     padding: 8,
     borderRadius: 999,
     backgroundColor: 'rgba(255,255,255,0.08)',
