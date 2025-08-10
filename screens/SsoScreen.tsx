@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,10 +15,24 @@ import { auth } from '../firebase/config';
 
 WebBrowser.maybeCompleteAuthSession();
 
-export default function SignInScreen() {
+export default function SsoScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { scores, feedback } = useLocalSearchParams<{ scores?: string; feedback?: string }>();
+
+  const next = useCallback(() => {
+    if (scores) {
+      router.replace({ pathname: '/rating', params: { scores, feedback } });
+    } else {
+      router.replace('/upload');
+    }
+  }, [router, scores, feedback]);
+
+  useEffect(() => {
+    if (auth.currentUser) {
+      next();
+    }
+  }, [next]);
 
   const [, response, promptAsync] = Google.useIdTokenAuthRequest({
     clientId: 'YOUR_GOOGLE_CLIENT_ID',
@@ -30,15 +44,13 @@ export default function SignInScreen() {
       if (idToken) {
         const credential = GoogleAuthProvider.credential(idToken);
         signInWithCredential(auth, credential)
-          .then(() => {
-            router.replace({ pathname: '/rating', params: { scores, feedback } });
-          })
+          .then(next)
           .catch(() => {
             Alert.alert('Error', 'Google sign-in failed');
           });
       }
     }
-  }, [response, router, scores, feedback]);
+  }, [response, next]);
 
   const onGoogle = async () => {
     await promptAsync();
@@ -56,7 +68,7 @@ export default function SignInScreen() {
       const provider = new OAuthProvider('apple.com');
       const credential = provider.credential({ idToken: res.identityToken });
       await signInWithCredential(auth, credential);
-      router.replace({ pathname: '/rating', params: { scores, feedback } });
+      next();
     } catch (e: any) {
       if (e.code === 'ERR_CANCELED') return;
       Alert.alert('Error', 'Apple sign-in failed');

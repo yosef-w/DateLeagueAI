@@ -205,7 +205,7 @@ export default function UploadScreen(): React.ReactElement {
       ];
 
       router.push({
-        pathname: '/signin',
+        pathname: '/sso',
         params: {
           feedback: data.result || '',
           scores: JSON.stringify(rating),
