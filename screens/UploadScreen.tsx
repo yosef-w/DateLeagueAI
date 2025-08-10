@@ -6,7 +6,6 @@ import {
   Alert,
   Text,
   Pressable,
-  Platform,
   ScrollView,
   Dimensions,
 } from 'react-native';
@@ -17,16 +16,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
-
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase/config';
 
 const MAX_IMAGES = 6;
-const NUM_COLS = 3;
 const { width: SCREEN_W } = Dimensions.get('window');
 
+// ---- types ----
 type ItemStatus = 'ready' | 'uploading' | 'uploaded' | 'error';
-
 type PhotoItem = {
   id: string;
   uri: string;          // optimized local uri
@@ -48,7 +45,7 @@ export default function UploadScreen(): React.ReactElement {
     Array.from({ length: MAX_IMAGES }, () => null)
   );
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [busy, setBusy] = useState(false); // general guard for user actions
+  const [busy, setBusy] = useState(false);
 
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -66,18 +63,7 @@ export default function UploadScreen(): React.ReactElement {
     return true;
   }, []);
 
-  const requestCameraPerms = useCallback(async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission required', 'Please allow camera access to continue.');
-      return false;
-    }
-    return true;
-  }, []);
-
   // ------ utils ------
-  const firstEmptyIndex = useCallback(() => slots.findIndex(s => s === null), [slots]);
-
   const setSlot = useCallback((index: number, item: PhotoItem | null) => {
     setSlots(prev => {
       const copy = prev.slice();
@@ -125,7 +111,7 @@ export default function UploadScreen(): React.ReactElement {
       if (busyRef.current) return;
       if (!(await requestLibraryPerms())) return;
 
-      // collect empty indices up front, so we fill deterministically
+      // collect empty indices up front
       const empties: number[] = [];
       slots.forEach((s, i) => { if (!s) empties.push(i); });
       if (empties.length === 0) {
@@ -145,13 +131,11 @@ export default function UploadScreen(): React.ReactElement {
         setBusy(true);
 
         const chosen = result.assets.slice(0, empties.length);
-        // place sequentially into each empty slot
         for (let i = 0; i < chosen.length; i++) {
           // eslint-disable-next-line no-await-in-loop
           await optimizeAndSet(empties[i], chosen[i].uri);
         }
 
-        // focus the first newly filled index
         if (empties.length > 0) setSelectedIndex(empties[0]);
 
         busyRef.current = false;
@@ -165,34 +149,6 @@ export default function UploadScreen(): React.ReactElement {
       Alert.alert('Error', 'Unable to select image(s).');
     }
   }, [optimizeAndSet, requestLibraryPerms, slots]);
-
-  const takePhotoFillNext = useCallback(async () => {
-    try {
-      if (busyRef.current) return;
-      if (!(await requestCameraPerms())) return;
-
-      const idx = firstEmptyIndex();
-      if (idx === -1) {
-        Alert.alert('All set', 'All six slots are filled.');
-        return;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-      });
-
-      if (!result.canceled && result.assets.length > 0) {
-        await optimizeAndSet(idx, result.assets[0].uri);
-        setSelectedIndex(idx);
-        Haptics.selectionAsync();
-      }
-    } catch (e) {
-      console.error('Camera error', e);
-      Alert.alert('Error', 'Unable to take photo.');
-    }
-  }, [firstEmptyIndex, optimizeAndSet, requestCameraPerms]);
 
   // ------ analyze flow ------
   const getImageUrlsFromSlots = useCallback(async (items: (PhotoItem | null)[]) => {
@@ -242,15 +198,12 @@ export default function UploadScreen(): React.ReactElement {
       }
 
       const data = await res.json();
-
-      // Build sample rating categories; backend may also return `scores`
       const rating = data.scores || [
         { label: 'Photo Quality', score: 7 },
         { label: 'Bio', score: 6 },
         { label: 'Interests', score: 8 },
       ];
 
-      // Navigate to rating screen first, then allow user to view tips
       router.push({
         pathname: '/rating',
         params: {
@@ -284,12 +237,12 @@ export default function UploadScreen(): React.ReactElement {
           <Ionicons name="chevron-back" size={24} color="#e5e7eb" />
         </Pressable>
 
-        <ScrollView contentContainerStyle={ui.container}>
+        <ScrollView contentContainerStyle={ui.container} showsVerticalScrollIndicator={false}>
           <Text style={ui.title}>Upload Photos</Text>
           <Text style={ui.subtitle}>Add up to {MAX_IMAGES} photos. Tap a slot to add or replace.</Text>
 
           <View style={ui.card}>
-            {/* 3 × 2 grid (no huge gaps) */}
+            {/* Two-column grid. Tiles auto-size via % and aspectRatio. */}
             <View style={ui.grid}>
               {slots.map((s, i) => {
                 const isActive = i === selectedIndex;
@@ -336,12 +289,15 @@ export default function UploadScreen(): React.ReactElement {
             </View>
 
             {/* Actions */}
-            <View style={[ui.actionsRow, { marginTop: 14 }]}>
+            <View style={[ui.actionsRow, { marginTop: 16 }]}>
               <PrimaryButton label="Pick from Library" onPress={pickFromLibraryBulk} />
-              <PrimaryButton label="Use Camera" onPress={takePhotoFillNext} variant="ghost" />
             </View>
             <View style={[ui.actionsRow, { marginTop: 10 }]}>
-              <PrimaryButton label={busy ? 'Analyzing…' : 'Analyze Photos'} onPress={analyzePhotos} disabled={busy} />
+              <PrimaryButton
+                label={busy ? 'Analyzing…' : 'Analyze Photos'}
+                onPress={analyzePhotos}
+                disabled={busy}
+              />
             </View>
           </View>
         </ScrollView>
@@ -412,24 +368,19 @@ async function uploadImageAsync(uri: string): Promise<string> {
   const storageRef = ref(storage, `photos/${filename}`);
 
   await uploadBytes(storageRef, blob, { contentType });
-
-  // @ts-ignore React Native Blob may have non-standard close
+  // @ts-ignore react-native Blob may expose close()
   (blob as any).close?.();
 
   const downloadURL = await getDownloadURL(storageRef);
   return downloadURL;
 }
 
-// ---- styles ----
-const CARD_MAX_W = 560;          // widen card a bit so tiles can be larger
-const PADDING_H = 16;
-const GRID_COL_GAP = 10;         // small consistent gap
-const GRID_ROW_GAP = 10;
-const cardWidth = Math.min(SCREEN_W - PADDING_H * 2, CARD_MAX_W);
-const tileSize = Math.floor((cardWidth - GRID_COL_GAP * (NUM_COLS - 1)) / NUM_COLS);
+/* ---------------- styles ---------------- */
+const CONTAINER_PAD = 20;
 
 const ui = StyleSheet.create({
   screen: { flex: 1 },
+
   backBtn: {
     position: 'absolute',
     top: 16,
@@ -444,43 +395,48 @@ const ui = StyleSheet.create({
   backPressed: { transform: [{ scale: 0.98 }] },
 
   container: {
-    padding: 20,
+    padding: CONTAINER_PAD,
     paddingTop: 64,
     alignItems: 'center',
     gap: 16,
   },
+
   title: { color: 'white', fontSize: 24, fontWeight: '700', letterSpacing: 0.2 },
-  subtitle: { color: '#cbd5e1', fontSize: 14, textAlign: 'center', maxWidth: 360 },
+  subtitle: { color: '#cbd5e1', fontSize: 14, textAlign: 'center', maxWidth: 380 },
 
   card: {
-    width: cardWidth,
+    width: '100%',
+    maxWidth: 640,
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 16,
     padding: 16,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(255,255,255,0.15)',
+    minHeight: 420, // a little taller so the grid breathes
   },
 
-  // Grid with controlled, tight gaps
+  // Two-column grid; tiles take 48% width, stay square via aspectRatio,
+  // and have slight spacing around them.
   grid: {
+    width: '100%',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-    columnGap: GRID_COL_GAP,
-    rowGap: GRID_ROW_GAP,
+    justifyContent: 'space-between', // ensures a gap between the two columns
   },
 
   tile: {
-    width: tileSize,
-    height: tileSize,
-    borderRadius: 14,
+    width: '48%',
+    height: 200,     
+    aspectRatio: 1,      
+    borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: '#0b1020',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.25)',
+    borderColor: 'rgba(255,255,255,0.22)',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+    marginBottom: 12,    // slight spacing below each tile
   },
   tileEmpty: { backgroundColor: 'rgba(255,255,255,0.06)' },
   tileActive: { borderColor: '#60a5fa', borderWidth: 2 },
@@ -493,7 +449,7 @@ const ui = StyleSheet.create({
     bottom: 6,
     flexDirection: 'row',
     gap: 6,
-    backgroundColor: 'rgba(0,0,0,0.25)',
+    backgroundColor: 'rgba(0,0,0,0.28)',
     paddingHorizontal: 6,
     paddingVertical: 4,
     borderRadius: 999,
@@ -509,7 +465,6 @@ const ui = StyleSheet.create({
 
   actionsRow: { flexDirection: 'row', gap: 12, marginTop: 12 },
 
-  // Buttons
   btn: {
     flex: 1,
     paddingVertical: 12,
@@ -520,10 +475,7 @@ const ui = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(255,255,255,0.18)',
   },
-  btnGhost: {
-    backgroundColor: 'transparent',
-    borderColor: 'rgba(255,255,255,0.25)',
-  },
+  btnGhost: { backgroundColor: 'transparent', borderColor: 'rgba(255,255,255,0.25)' },
   btnDisabled: { opacity: 0.5 },
   btnPressed: { transform: [{ scale: 0.98 }] },
   btnText: { color: 'white', fontWeight: '600' },
