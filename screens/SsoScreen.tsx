@@ -94,8 +94,8 @@ export default function SsoScreen() {
         <View style={[styles.container, { paddingBottom: insets.bottom + 20 }]}>
           <Text style={styles.title}>Sign in to continue</Text>
           <View style={styles.actions}>
-            <PrimaryButton label="Sign in with Apple" onPress={onApple} />
-            <PrimaryButton label="Sign in with Google" onPress={onGoogle} />
+            <PrimaryButton label="Sign in with Apple" icon="logo-apple" onPress={onApple} />
+            <PrimaryButton label="Sign in with Google" icon="logo-google" onPress={onGoogle} />
           </View>
         </View>
       </SafeAreaView>
@@ -103,14 +103,25 @@ export default function SsoScreen() {
   );
 }
 
-function PrimaryButton({ label, onPress }: { label: string; onPress: () => void }) {
+function PrimaryButton({
+  label,
+  icon,
+  onPress,
+}: {
+  label: string;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
+  onPress: () => void;
+}) {
   return (
     <Pressable
       onPress={onPress}
       onPressIn={() => Haptics.selectionAsync()}
       style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
     >
-      <Text style={styles.btnText}>{label}</Text>
+      <View style={styles.btnContent}>
+        <Ionicons name={icon} size={20} color="#0b2447" style={styles.btnIcon} />
+        <Text style={styles.btnText}>{label}</Text>
+      </View>
     </Pressable>
   );
 }
@@ -139,6 +150,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
   },
+  btnContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  btnIcon: { marginRight: 8 },
   btnPressed: { opacity: 0.95, transform: [{ scale: 0.98 }] },
   btnText: {
     color: '#0b2447',
