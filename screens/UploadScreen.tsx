@@ -243,10 +243,20 @@ export default function UploadScreen(): React.ReactElement {
 
       const data = await res.json();
 
-      // 👉 Navigate to ResultsScreen and pass the feedback text
+      // Build sample rating categories; backend may also return `scores`
+      const rating = data.scores || [
+        { label: 'Photo Quality', score: 7 },
+        { label: 'Bio', score: 6 },
+        { label: 'Interests', score: 8 },
+      ];
+
+      // Navigate to rating screen first, then allow user to view tips
       router.push({
-        pathname: '/results',
-        params: { feedback: data.result || '' },
+        pathname: '/rating',
+        params: {
+          feedback: data.result || '',
+          scores: JSON.stringify(rating),
+        },
       });
     } catch (e: any) {
       console.error('Analyze error', e);
