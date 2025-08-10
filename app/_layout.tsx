@@ -27,6 +27,7 @@ export default function RootLayout() {
           <Stack.Screen name="signup" options={{ headerShown: false }} />
           <Stack.Screen name="likes" options={{ headerShown: false }} />
           <Stack.Screen name="upload" options={{ headerShown: false }} />
+          <Stack.Screen name="rating" options={{ headerShown: false }} />
           <Stack.Screen name="results" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />

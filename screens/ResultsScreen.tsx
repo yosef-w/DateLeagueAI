@@ -89,8 +89,11 @@ export default function ResultsScreen() {
         >
           <Ionicons name="chevron-back" size={24} color="#e5e7eb" />
         </Pressable>
-
-        <View style={styles.container}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={[styles.container, { paddingBottom: insets.bottom + 20 }]}
+          showsVerticalScrollIndicator={false}
+        >
           <Text style={styles.title}>Analysis Results</Text>
         <Text style={styles.subtitle}>
           Tips tailored to your photo{sections.length > 1 ? 's' : ''}. You can copy, share, or save for later.
@@ -119,7 +122,11 @@ export default function ResultsScreen() {
           )}
 
           {/* Markdown-rendered feedback */}
-          <ScrollView contentContainerStyle={styles.bodyWrap} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            contentContainerStyle={styles.bodyWrap}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled
+          >
             {activeText ? (
               <Markdown style={markdownStyles}>{activeText}</Markdown>
             ) : (
@@ -133,12 +140,12 @@ export default function ResultsScreen() {
             <PrimaryButton label="Share" onPress={onShare} variant="ghost" />
             <PrimaryButton label="Save" onPress={onSave} variant="ghost" />
           </View>
-        </View>
+          </View>
 
           <View style={styles.footerRow}>
             <PrimaryButton label="Analyze more photos" onPress={() => router.replace('/')} />
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -234,7 +241,7 @@ const styles = StyleSheet.create({
   },
   backPressed: { transform: [{ scale: 0.98 }] },
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: 20,
     paddingTop: 64,
     alignItems: 'center',
