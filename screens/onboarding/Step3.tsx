@@ -23,7 +23,7 @@ export default function Step3() {
       <FadeIn keySuffix="lot3">
         <LottieView
           ref={lotRef}
-          source={require('../../assets/lottie/clock-tick.json')}
+          source={require('../../assets/lottie/no-data-found.json')}
           autoPlay
           loop
           style={g.lottie}
