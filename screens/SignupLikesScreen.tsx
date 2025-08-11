@@ -63,7 +63,7 @@ export default function SignupLikesScreen() {
 
   const onContinue = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push('/upload');
+    router.push('/sso');
   };
 
   return (
