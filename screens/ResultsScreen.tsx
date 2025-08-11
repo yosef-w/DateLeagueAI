@@ -18,6 +18,7 @@ import Markdown from 'react-native-markdown-display';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
+import PrimaryButton from '../components/PrimaryButton';
 
 type Section = { title: string; body: string };
 
@@ -195,35 +196,6 @@ function formatExport(sections: Section[]): string {
     .join('\n');
 }
 
-function PrimaryButton({
-  label,
-  onPress,
-  disabled,
-  variant = 'solid',
-}: {
-  label: string;
-  onPress: () => void;
-  disabled?: boolean;
-  variant?: 'solid' | 'ghost';
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      style={({ pressed }) => [
-        styles.btn,
-        variant === 'ghost' && styles.btnGhost,
-        pressed && styles.btnPressed,
-        disabled && styles.btnDisabled,
-      ]}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-    >
-      <Text style={[styles.btnText, variant === 'ghost' && styles.btnTextGhost]}>{label}</Text>
-    </Pressable>
-  );
-}
-
 /* ---------------- styles ---------------- */
 
 const styles = StyleSheet.create({
@@ -280,22 +252,6 @@ const styles = StyleSheet.create({
   actionsRow: { flexDirection: 'row', gap: 12, marginTop: 14 },
 
   footerRow: { alignSelf: 'stretch', marginTop: 10 },
-
-  btn: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    backgroundColor: '#60a5fa',
-    alignItems: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.18)',
-  },
-  btnGhost: { backgroundColor: 'transparent', borderColor: 'rgba(255,255,255,0.25)' },
-  btnDisabled: { opacity: 0.5 },
-  btnPressed: { transform: [{ scale: 0.98 }] },
-  btnText: { color: 'white', fontWeight: '600' },
-  btnTextGhost: { color: '#e5e7eb' },
 });
 
 /* Markdown theme (handles ### headings, bold, lists, code, etc.) */

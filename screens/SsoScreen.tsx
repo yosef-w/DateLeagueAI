@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -12,6 +12,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Google from 'expo-auth-session/providers/google';
 import { signInWithCredential, GoogleAuthProvider, OAuthProvider } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import PrimaryButton from '../components/PrimaryButton';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -128,67 +129,25 @@ export default function SsoScreen() {
             end={{ x: 1, y: 1 }}
             style={styles.card}
           >
-            <BrandBlueButton
+            <PrimaryButton
               label="Sign in with Apple"
               icon="logo-apple"
               onPress={onApple}
               loading={isLoadingApple}
               disabled={disabled}
-              darkIcon
+              style={{ marginBottom: 12 }}
             />
-            <BrandBlueButton
+            <PrimaryButton
               label="Sign in with Google"
               icon="logo-google"
               onPress={onGoogle}
               loading={isLoadingGoogle}
               disabled={disabled}
-              darkIcon
             />
           </LinearGradient>
         </View>
       </SafeAreaView>
     </LinearGradient>
-  );
-}
-
-/* ---------------- Reusable App-Blue Brand Button ---------------- */
-function BrandBlueButton({
-  label,
-  icon,
-  onPress,
-  loading,
-  disabled,
-  darkIcon = true,
-}: {
-  label: string;
-  icon: React.ComponentProps<typeof Ionicons>['name'];
-  onPress: () => void;
-  loading?: boolean;
-  disabled?: boolean;
-  darkIcon?: boolean; // keeps icon dark enough for AA contrast on white chip
-}) {
-  const iconColor = darkIcon ? '#0b2447' : '#111827';
-  return (
-    <Pressable
-      onPress={onPress}
-      onPressIn={() => Haptics.selectionAsync()}
-      disabled={disabled || loading}
-      style={({ pressed }) => [
-        styles.btnBlue,
-        pressed && styles.btnPressed,
-        (disabled || loading) && styles.btnDisabled,
-      ]}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-    >
-      <View style={styles.btnContent}>
-        <View style={styles.brandChip}>
-          <Ionicons name={icon} size={16} color={iconColor} />
-        </View>
-        <Text style={styles.btnBlueText}>{label}</Text>
-        {loading && <ActivityIndicator size="small" color="#0b2447" style={{ marginLeft: 8 }} />}
-      </View>
-    </Pressable>
   );
 }
 
@@ -243,36 +202,4 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.05)',
   },
 
-  // App-blue buttons
-  btnBlue: {
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginBottom: 12,
-    backgroundColor: '#60a5fa',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.18)',
-  },
-  btnBlueText: {
-    color: '#0b2447',
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.2,
-  },
-
-  btnPressed: { transform: [{ scale: 0.985 }], opacity: 0.96 },
-  btnDisabled: { opacity: 0.6 },
-
-  btnContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-
-  // White circular chip holding the Ionicons brand glyph
-  brandChip: {
-    width: 28,
-    height: 28,
-    borderRadius: 999,
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-  },
 });

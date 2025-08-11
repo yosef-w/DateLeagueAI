@@ -5,6 +5,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
+import PrimaryButton from '../components/PrimaryButton';
 
 type Question = {
   question: string;
@@ -203,15 +204,7 @@ export default function SignupScreen() {
               style={[s.bottomBar, { paddingBottom: Math.max(12, insets.bottom) }]}
               onLayout={e => setBottomBarH(e.nativeEvent.layout.height)}
             >
-              <Pressable
-                onPress={onConfirmMulti}
-                onPressIn={() => Haptics.selectionAsync()}
-                style={({ pressed }) => [s.continueBtn, pressed && s.continuePressed]}
-                accessibilityRole="button"
-                accessibilityLabel="Continue"
-              >
-                <Text style={s.continueText}>Continue</Text>
-              </Pressable>
+              <PrimaryButton label="Continue" onPress={onConfirmMulti} style={{ width: '100%' }} />
             </View>
           )}
         </View>
@@ -294,22 +287,6 @@ const s = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 8,
     backgroundColor: 'transparent',
-  },
-  continueBtn: {
-    width: '100%',
-    paddingVertical: 14,
-    borderRadius: 14,
-    backgroundColor: '#60a5fa',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.18)',
-  },
-  continuePressed: { transform: [{ scale: 0.98 }], opacity: 0.95 },
-  continueText: {
-    color: '#0b2447',
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.2,
-    textAlign: 'center',
   },
 
   backBtn: {

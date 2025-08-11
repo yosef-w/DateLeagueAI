@@ -18,6 +18,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase/config';
+import PrimaryButton from '../components/PrimaryButton';
 
 const MAX_IMAGES = 6;
 const { width: SCREEN_W } = Dimensions.get('window');
@@ -321,35 +322,6 @@ async function optimizeImage(uri: string): Promise<string> {
   }
 }
 
-function PrimaryButton({
-  label,
-  onPress,
-  disabled,
-  variant = 'solid',
-}: {
-  label: string;
-  onPress: () => void;
-  disabled?: boolean;
-  variant?: 'solid' | 'ghost';
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      style={({ pressed }) => [
-        ui.btn,
-        variant === 'ghost' && ui.btnGhost,
-        pressed && ui.btnPressed,
-        disabled && ui.btnDisabled,
-      ]}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-    >
-      <Text style={[ui.btnText, variant === 'ghost' && ui.btnTextGhost]}>{label}</Text>
-    </Pressable>
-  );
-}
-
 // ---- Firebase upload (inlined) ----
 async function uploadImageAsync(uri: string): Promise<string> {
   // Read file as blob in RN
@@ -465,19 +437,4 @@ const ui = StyleSheet.create({
 
   actionsRow: { flexDirection: 'row', gap: 12, marginTop: 12 },
 
-  btn: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    backgroundColor: '#60a5fa',
-    alignItems: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.18)',
-  },
-  btnGhost: { backgroundColor: 'transparent', borderColor: 'rgba(255,255,255,0.25)' },
-  btnDisabled: { opacity: 0.5 },
-  btnPressed: { transform: [{ scale: 0.98 }] },
-  btnText: { color: 'white', fontWeight: '600' },
-  btnTextGhost: { color: '#e5e7eb' },
 });

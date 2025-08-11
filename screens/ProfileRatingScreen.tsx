@@ -6,6 +6,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { MotiView } from 'moti';
+import PrimaryButton from '../components/PrimaryButton';
 
 interface Category {
   label: string;
@@ -330,33 +331,6 @@ function ChipSmall({ label, tone }: { label: string; tone: 'good' | 'warn' }) {
 }
 
 /* ---------------- CTA ---------------- */
-function PrimaryButton({
-  label,
-  onPress,
-  disabled,
-}: {
-  label: string;
-  onPress: () => void;
-  disabled?: boolean;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      style={({ pressed }) => [
-        styles.btn,
-        pressed && styles.btnPressed,
-        disabled && styles.btnDisabled,
-      ]}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPressIn={() => Haptics.selectionAsync()}
-    >
-      <Text style={styles.btnText}>{label}</Text>
-    </Pressable>
-  );
-}
-
 /* ---------------- styles ---------------- */
 const RING_SIZE = 112;
 
@@ -530,17 +504,4 @@ const styles = StyleSheet.create({
   needsPillText: { fontSize: 12, fontWeight: '700' },
 
   footerRow: { alignSelf: 'stretch', marginTop: 16 },
-
-  btn: {
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    borderRadius: 14,
-    backgroundColor: '#60a5fa',
-    alignItems: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.18)',
-  },
-  btnDisabled: { opacity: 0.5 },
-  btnPressed: { transform: [{ scale: 0.98 }] },
-  btnText: { color: 'white', fontWeight: '700', fontSize: 16 },
 });
