@@ -6,9 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-// eslint-disable-next-line import/no-unresolved
 import * as AppleAuthentication from 'expo-apple-authentication';
-// eslint-disable-next-line import/no-unresolved
 import * as Google from 'expo-auth-session/providers/google';
 import { signInWithCredential, GoogleAuthProvider, OAuthProvider } from 'firebase/auth';
 import { auth } from '../firebase/config';
@@ -29,7 +27,6 @@ export default function SsoScreen() {
     }
   }, [router, scores, feedback]);
 
-  // Already signed in? Jump ahead.
   useEffect(() => {
     if (auth.currentUser) next();
   }, [next]);
@@ -51,7 +48,7 @@ export default function SsoScreen() {
           const credential = GoogleAuthProvider.credential(idToken);
           await signInWithCredential(auth, credential);
           next();
-        } catch (err) {
+        } catch {
           Alert.alert('Error', 'Google sign-in failed');
         } finally {
           setIsLoadingGoogle(false);
@@ -93,6 +90,11 @@ export default function SsoScreen() {
     }
   };
 
+  const onSkip = () => {
+    Haptics.selectionAsync();
+    next();
+  };
+
   const disabled = isLoadingApple || isLoadingGoogle;
 
   return (
@@ -119,7 +121,6 @@ export default function SsoScreen() {
             Save your progress, sync across devices, and get faster recommendations.
           </Text>
 
-          {/* extra spacing under the title */}
           <View style={{ height: 16 }} />
 
           {/* Glass card */}
@@ -144,6 +145,22 @@ export default function SsoScreen() {
               loading={isLoadingGoogle}
               disabled={disabled}
             />
+
+            {/* Divider */}
+            <View style={styles.dividerRow}>
+              <View style={styles.hr} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.hr} />
+            </View>
+
+            {/* Skip */}
+            <Pressable
+              onPress={onSkip}
+              disabled={disabled}
+              style={({ pressed }) => [styles.skip, pressed && styles.skipPressed]}
+            >
+              <Text style={styles.skipText}>Skip for now</Text>
+            </Pressable>
           </LinearGradient>
         </View>
       </SafeAreaView>
@@ -167,11 +184,10 @@ const styles = StyleSheet.create({
   },
   backPressed: { transform: [{ scale: 0.98 }] },
 
-  // Vertically centered stack with some top padding
   centerWrap: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 48, // padding above the card & below the title area
+    paddingTop: 48,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -202,4 +218,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.05)',
   },
 
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  hr: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  dividerText: {
+    color: '#cbd5e1',
+    fontSize: 12,
+    marginHorizontal: 8,
+  },
+
+  skip: { paddingVertical: 8, alignItems: 'center' },
+  skipPressed: { opacity: 0.8 },
+  skipText: { color: '#94a3b8', fontSize: 14 },
 });
