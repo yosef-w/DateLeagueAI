@@ -5,6 +5,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
+import PrimaryButton from '../components/PrimaryButton';
 
 export default function SignupLikesScreen() {
   const insets = useSafeAreaInsets();
@@ -145,14 +146,7 @@ export default function SignupLikesScreen() {
           </View>
 
           {/* CTA */}
-          <Pressable
-            onPress={onContinue}
-            style={({ pressed }) => [s.continueBtn, pressed && s.continuePressed]}
-            accessibilityRole="button"
-            accessibilityLabel="Continue to upload"
-          >
-            <Text style={s.continueText}>Continue</Text>
-          </Pressable>
+          <PrimaryButton label="Continue" onPress={onContinue} />
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -304,19 +298,6 @@ const s = StyleSheet.create({
   labelCell: { width: 120, alignItems: 'center' },
   barLabel: { color: '#e5e7eb', fontWeight: '700' },
 
-  continueBtn: {
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 999,
-    backgroundColor: '#60a5fa',
-  },
-  continuePressed: { opacity: 0.9, transform: [{ scale: 0.98 }] },
-  continueText: {
-    color: '#0b2447',
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.2,
-  },
 
   backBtn: {
     position: 'absolute',

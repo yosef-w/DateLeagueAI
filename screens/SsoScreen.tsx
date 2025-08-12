@@ -1,17 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-// eslint-disable-next-line import/no-unresolved
 import * as AppleAuthentication from 'expo-apple-authentication';
-// eslint-disable-next-line import/no-unresolved
 import * as Google from 'expo-auth-session/providers/google';
 import { signInWithCredential, GoogleAuthProvider, OAuthProvider } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import PrimaryButton from '../components/PrimaryButton';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -28,7 +27,6 @@ export default function SsoScreen() {
     }
   }, [router, scores, feedback]);
 
-  // Already signed in? Jump ahead.
   useEffect(() => {
     if (auth.currentUser) next();
   }, [next]);
@@ -50,7 +48,7 @@ export default function SsoScreen() {
           const credential = GoogleAuthProvider.credential(idToken);
           await signInWithCredential(auth, credential);
           next();
-        } catch (err) {
+        } catch {
           Alert.alert('Error', 'Google sign-in failed');
         } finally {
           setIsLoadingGoogle(false);
@@ -92,6 +90,11 @@ export default function SsoScreen() {
     }
   };
 
+  const onSkip = () => {
+    Haptics.selectionAsync();
+    next();
+  };
+
   const disabled = isLoadingApple || isLoadingGoogle;
 
   return (
@@ -118,7 +121,6 @@ export default function SsoScreen() {
             Save your progress, sync across devices, and get faster recommendations.
           </Text>
 
-          {/* extra spacing under the title */}
           <View style={{ height: 16 }} />
 
           {/* Glass card */}
@@ -128,67 +130,41 @@ export default function SsoScreen() {
             end={{ x: 1, y: 1 }}
             style={styles.card}
           >
-            <BrandBlueButton
+            <PrimaryButton
               label="Sign in with Apple"
               icon="logo-apple"
               onPress={onApple}
               loading={isLoadingApple}
               disabled={disabled}
-              darkIcon
+              style={{ marginBottom: 12 }}
             />
-            <BrandBlueButton
+            <PrimaryButton
               label="Sign in with Google"
               icon="logo-google"
               onPress={onGoogle}
               loading={isLoadingGoogle}
               disabled={disabled}
-              darkIcon
             />
+
+            {/* Divider */}
+            <View style={styles.dividerRow}>
+              <View style={styles.hr} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.hr} />
+            </View>
+
+            {/* Skip */}
+            <Pressable
+              onPress={onSkip}
+              disabled={disabled}
+              style={({ pressed }) => [styles.skip, pressed && styles.skipPressed]}
+            >
+              <Text style={styles.skipText}>Skip for now</Text>
+            </Pressable>
           </LinearGradient>
         </View>
       </SafeAreaView>
     </LinearGradient>
-  );
-}
-
-/* ---------------- Reusable App-Blue Brand Button ---------------- */
-function BrandBlueButton({
-  label,
-  icon,
-  onPress,
-  loading,
-  disabled,
-  darkIcon = true,
-}: {
-  label: string;
-  icon: React.ComponentProps<typeof Ionicons>['name'];
-  onPress: () => void;
-  loading?: boolean;
-  disabled?: boolean;
-  darkIcon?: boolean; // keeps icon dark enough for AA contrast on white chip
-}) {
-  const iconColor = darkIcon ? '#0b2447' : '#111827';
-  return (
-    <Pressable
-      onPress={onPress}
-      onPressIn={() => Haptics.selectionAsync()}
-      disabled={disabled || loading}
-      style={({ pressed }) => [
-        styles.btnBlue,
-        pressed && styles.btnPressed,
-        (disabled || loading) && styles.btnDisabled,
-      ]}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-    >
-      <View style={styles.btnContent}>
-        <View style={styles.brandChip}>
-          <Ionicons name={icon} size={16} color={iconColor} />
-        </View>
-        <Text style={styles.btnBlueText}>{label}</Text>
-        {loading && <ActivityIndicator size="small" color="#0b2447" style={{ marginLeft: 8 }} />}
-      </View>
-    </Pressable>
   );
 }
 
@@ -208,11 +184,10 @@ const styles = StyleSheet.create({
   },
   backPressed: { transform: [{ scale: 0.98 }] },
 
-  // Vertically centered stack with some top padding
   centerWrap: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 48, // padding above the card & below the title area
+    paddingTop: 48,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -243,36 +218,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.05)',
   },
 
-  // App-blue buttons
-  btnBlue: {
-    paddingVertical: 14,
-    borderRadius: 14,
+  dividerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-    backgroundColor: '#60a5fa',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.18)',
+    marginVertical: 16,
   },
-  btnBlueText: {
-    color: '#0b2447',
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.2,
+  hr: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  dividerText: {
+    color: '#cbd5e1',
+    fontSize: 12,
+    marginHorizontal: 8,
   },
 
-  btnPressed: { transform: [{ scale: 0.985 }], opacity: 0.96 },
-  btnDisabled: { opacity: 0.6 },
-
-  btnContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-
-  // White circular chip holding the Ionicons brand glyph
-  brandChip: {
-    width: 28,
-    height: 28,
-    borderRadius: 999,
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-  },
+  skip: { paddingVertical: 8, alignItems: 'center' },
+  skipPressed: { opacity: 0.8 },
+  skipText: { color: '#94a3b8', fontSize: 14 },
 });
