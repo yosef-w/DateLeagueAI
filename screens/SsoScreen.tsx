@@ -23,7 +23,7 @@ export default function SsoScreen() {
     if (scores) {
       router.replace({ pathname: '/rating', params: { scores, feedback } });
     } else {
-      router.replace('/upload');
+      router.replace('/(tabs)/photos');
     }
   }, [router, scores, feedback]);
 
